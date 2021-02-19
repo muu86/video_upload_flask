@@ -19,6 +19,20 @@ app = Flask(__name__, static_url_path='/static')
 #     return '.' in filename and \
 #            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# openpose 패스 설정
+op_path = "C:/openpose/bin/python/openpose/Release"
+sys.path.append(op_path)
+os.environ['PATH'] = os.environ['PATH'] + ';' + 'C:/openpose/bin'
+
+# opencv 패스 설정
+cv2_path = "C:/Users/USER/AppData/Local/Programs/Python/Python37/Lib/site-packages/cv2/python-3.7"
+sys.path.append(cv2_path)
+# sys.path.append('C:\\Users\\USER\\AppData\\Local\\Programs\\Python\\Python37\\lib\\site-packages')
+
+# golfDB 패스 설정
+golfdb_path = "C:\\golfdb\\"
+sys.path.append(golfdb_path)
+
 
 @app.route('/uploads', methods=['GET', 'POST'])
 def upload_file():
@@ -36,26 +50,21 @@ def upload_file():
 
         file.save(os.path.join(os.getcwd(), 'uploads.mp4'))
 
-
-
         try:
-            op_path = "C:/openpose/bin/python/openpose/Release"
             try:
-                sys.path.append(op_path)
-                os.environ['PATH'] = os.environ['PATH'] + ';' + 'C:/openpose/bin'
-
                 import pyopenpose as op
 
             except ImportError as e:
                 raise e
 
-            # cv2 import
-            cv2_path = "C:/Users/USER/AppData/Local/Programs/Python/Python37/Lib/site-packages/cv2/python-3.7"
             try:
-                sys.path.append(cv2_path)
-                sys.path.append('C:\\Users\\USER\\AppData\\Local\\Programs\\Python\\Python37\\lib\\site-packages')
-
                 import cv2
+
+            except ImportError as e:
+                raise e
+
+            try:
+                from test_video import SampleVideo
 
             except ImportError as e:
                 raise e

@@ -3,3 +3,4 @@ venv/
 static/
 
 *.mp4
+*.tar
