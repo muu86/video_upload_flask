@@ -4,6 +4,7 @@ import cv2
 import json
 import pickle
 import numpy as np
+from datetime import datetime
 from flask import Flask, request, send_from_directory, abort
 import torch
 from torch.utils.data import DataLoader
@@ -11,6 +12,7 @@ from torchvision import transforms
 import torch.nn.functional as F
 
 from anal_poses import anal
+from anal_poses.utils import MyEncoder
 
 # openpose 패스 설정
 op_path = "C:/openpose/bin/python/openpose/Release"
@@ -122,6 +124,10 @@ def upload_file():
 
     datum = op.Datum()
 
+    # 이미지를 저장할 filename을 현재 시간으로 설정
+    now = datetime.now()
+    image_save_name = datetime.timestamp(now)
+
     # 각 프레임의 키포인트를 dict 로 모음
     key_data = dict()
     for i, e in enumerate(events):
@@ -133,19 +139,19 @@ def upload_file():
         datum.cvInputData = img
         opWrapper.emplaceAndPop(op.VectorDatum([datum]))
         key_data[i] = datum.poseKeypoints[0]
-        cv2.imwrite(save_path + str(i) + '.png', datum.cvOutputData)
+        cv2.imwrite(f'{save_path}{image_save_name}_{str(i)}.png', datum.cvOutputData)
 
     cap.release()
 
     # 뽑아낸 키포인트를 분석
     swing_anal = anal.Anal(key_data)
 
-    # check_all 함수에서 json.dumps를 리턴
     result = swing_anal.check_all()
 
-    print(result)
+    # result에 이미지가 저장되는 경로 넣어줌
+    result["image_path"] = image_save_name
 
-    return result
+    return json.dumps(result, cls=MyEncoder)
 
 
 @app.route('/get-images/<image_name><i>')
